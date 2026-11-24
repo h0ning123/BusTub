@@ -150,7 +150,7 @@ class BufferPoolManagerInstance : public BufferPoolManager {
   /** Array of buffer pool pages. */
   Page *pages_;
   /** Pointer to the disk manager. */
-  DiskManager *disk_manager_ __attribute__((__unused__));
+  DiskManager *disk_manager_;
   /** Pointer to the log manager. Please ignore this for P1. */
   LogManager *log_manager_ __attribute__((__unused__));
   /** Page table for keeping track of buffer pool pages. */
@@ -159,7 +159,7 @@ class BufferPoolManagerInstance : public BufferPoolManager {
   LRUKReplacer *replacer_;
   /** List of free frames that don't have any pages on them. */
   std::list<frame_id_t> free_list_;
-  /** This latch protects shared data structures. We recommend updating this comment to describe what it protects. */
+  /** Protects page metadata, the page table, free list and coordinated replacer updates. */
   std::mutex latch_;
 
   /**
@@ -176,6 +176,8 @@ class BufferPoolManagerInstance : public BufferPoolManager {
     // This is a no-nop right now without a more complex data structure to track deallocated pages
   }
 
-  // TODO(student): You may add additional private members and helper functions
+ private:
+  /** Obtain and reset a free or evicted frame. Caller must hold latch_. */
+  auto AcquireFrame(frame_id_t *frame_id) -> bool;
 };
 }  // namespace bustub
